@@ -145,17 +145,27 @@ class RegisterController extends GetxController {
       print('API Response: $response');
 
       if (response != null && response['status'] == true) {
-        print('Registration successful');
+        print('✅ Registration successful');
 
         final userData = response['user'];
         final token = response['token'];
 
+        // ✅ FIX: Save token to storage
+        final storage = GetStorage();
+        await storage.write('auth_token', token);
+        print('💾 Token saved to storage');
+
+        // ✅ FIX: Update MyAppController with user data
         final MyAppController myAppController = Get.find<MyAppController>();
         myAppController.updateUserData(userData);
 
+        // ✅ FIX: Set authentication status to true (already logged in)
+        myAppController.isAuthenticated.value = true;
+        print('🔐 Authentication status set to true');
+
         Get.snackbar(
           'نجاح',
-          'تم إنشاء الحساب بنجاح',
+          'تم إنشاء الحساب بنجاح ✓',
           backgroundColor: Colors.green,
           colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,
@@ -164,8 +174,9 @@ class RegisterController extends GetxController {
 
         await Future.delayed(const Duration(milliseconds: 1500));
 
-        print('Navigating to login screen...');
-        Get.toNamed('/login');
+        // ✅ FIX: Navigate to home (not login) - user is now authenticated
+        print('🏠 Navigating to home screen (auto-logged in)...');
+        Get.offAllNamed('/home');
       } else {
         print('Registration failed with response: $response');
         _handleApiError(response);
